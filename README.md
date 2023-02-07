@@ -24,6 +24,7 @@ swap of RGB565 color on the LVGL configuration menuconfig (it's not handled auto
 | ILI9488                                     | TFT        | SPI                    | 16: RGB565                   | No                                     |
 | HX8357B/HX8357D                             | TFT        | SPI                    | 16: RGB565                   | Yes                                    |
 | ST7789                                      | TFT        | SPI                    | 16: RGB565                   | Yes                                    |
+| ST7789V                                     | TFT        | SPI                    | 16: RGB565                   | Yes                                    |
 | ST7735S                                     | TFT        | SPI                    | 16: RGB565                   | Yes                                    |
 | FT81x                                       | TFT        | Single, Dual, Quad SPI | 16: RGB565                   | No                                     |
 | GC9A01                                      | TFT        | SPI                    | 16: RGB565                   | Yes                                    |
@@ -62,7 +63,7 @@ and sets the gpio numbers for the interface.
 | RPi MPI3501               | ILI9486               | SPI       | -         | -         |
 | Wemos Lolin OLED          | SSD1306               | SPI       | 64        | 128       |
 | ER-TFT035-6               | ILI9488               | SPI       | 480       | 320       |
-| AIRcable ATAGv3           | IL3820                | SPI       | 128       | 296       |
+| AIRcable ATAGv3           | IL3820                | SPI       | 127       | 296       |
 | TTGO T-Display            | ST7789                | SPI       | 135       | 240       |
 | TTGO Camera Plus          | ST7789                | SPI       | 240       | 240       |
 
