@@ -114,6 +114,11 @@ menu "LVGL TFT Display controller"
         help
             ST7789 display controller.
 
+    config LV_TFT_DISPLAY_CONTROLLER_ST7789V
+        bool
+        help
+            ST7789V display controller.
+
     config LV_TFT_DISPLAY_CONTROLLER_GC9A01
         bool
         help
@@ -290,6 +295,10 @@ menu "LVGL TFT Display controller"
     config LV_TFT_DISPLAY_USER_CONTROLLER_ST7789
         bool "ST7789"
             select LV_TFT_DISPLAY_CONTROLLER_ST7789
+            select LV_TFT_DISPLAY_PROTOCOL_SPI
+    config LV_TFT_DISPLAY_USER_CONTROLLER_ST7789V
+        bool "ST7789V"
+            select LV_TFT_DISPLAY_CONTROLLER_ST7789V
             select LV_TFT_DISPLAY_PROTOCOL_SPI
     config LV_TFT_DISPLAY_USER_CONTROLLER_ST7796S
         bool "ST7796S"
@@ -516,7 +525,7 @@ menu "LVGL TFT Display controller"
     choice
         prompt "Select a custom frequency."
         depends on LV_TFT_USE_CUSTOM_SPI_CLK_DIVIDER
-        default LV_TFT_SPI_CLK_DIVIDER_4 if LV_TFT_DISPLAY_CONTROLLER_ST7789 ||LV_TFT_DISPLAY_CONTROLLER_GC9A01 || LV_TFT_DISPLAY_CONTROLLER_ILI9486
+        default LV_TFT_SPI_CLK_DIVIDER_4 if LV_TFT_DISPLAY_CONTROLLER_ST7789 || LV_TFT_DISPLAY_CONTROLLER_ST7789V || LV_TFT_DISPLAY_CONTROLLER_GC9A01 || LV_TFT_DISPLAY_CONTROLLER_ILI9486
         default LV_TFT_SPI_CLK_DIVIDER_2 if LV_TFT_DISPLAY_CONTROLLER_ST7796S
         default LV_TFT_SPI_CLK_DIVIDER_5 if LV_TFT_DISPLAY_CONTROLLER_ILI9481
         default LV_TFT_SPI_CLK_DIVIDER_3 if LV_TFT_DISPLAY_CONTROLLER_HX8357
@@ -601,7 +610,7 @@ menu "LVGL TFT Display controller"
             If text is backwards on your display, try enabling this.
 
     config LV_INVERT_COLORS
-        bool "Invert colors in display" if LV_TFT_DISPLAY_CONTROLLER_ILI9341 || LV_TFT_DISPLAY_CONTROLLER_ST7735S || LV_TFT_DISPLAY_CONTROLLER_ILI9481 || LV_TFT_DISPLAY_CONTROLLER_ST7789 || LV_TFT_DISPLAY_CONTROLLER_SSD1306 || LV_TFT_DISPLAY_CONTROLLER_SH1107 || LV_TFT_DISPLAY_CONTROLLER_HX8357 || LV_TFT_DISPLAY_CONTROLLER_GC9A01 || LV_TFT_DISPLAY_CONTROLLER_ILI9163C
+        bool "Invert colors in display" if LV_TFT_DISPLAY_CONTROLLER_ILI9341 || LV_TFT_DISPLAY_CONTROLLER_ST7735S || LV_TFT_DISPLAY_CONTROLLER_ILI9481 || LV_TFT_DISPLAY_CONTROLLER_ST7789 || LV_TFT_DISPLAY_CONTROLLER_ST7789V || LV_TFT_DISPLAY_CONTROLLER_SSD1306 || LV_TFT_DISPLAY_CONTROLLER_SH1107 || LV_TFT_DISPLAY_CONTROLLER_HX8357 || LV_TFT_DISPLAY_CONTROLLER_GC9A01 || LV_TFT_DISPLAY_CONTROLLER_ILI9163C
         default y if LV_PREDEFINED_DISPLAY_M5STACK || LV_PREDEFINED_DISPLAY_M5STICKC
         help
             If the colors look inverted on your display, try enabling this.
@@ -735,6 +744,19 @@ menu "LVGL TFT Display controller"
         config LV_DISP_ST7789_SOFT_RESET
             bool "Soft reset - use software reset instead of reset pin"
             depends on LV_TFT_DISPLAY_CONTROLLER_ST7789
+            default n
+            help
+                Use software reset and ignores configured reset pin (some hardware does not use a reset pin).
+
+    endmenu
+
+    # menu will be visible only when LV_PREDEFINED_DISPLAY_NONE is y
+    menu "Display ST7789V Configuration"
+    visible if LV_TFT_DISPLAY_CONTROLLER_ST7789V
+
+        config LV_DISP_ST7789V_SOFT_RESET
+            bool "Soft reset - use software reset instead of reset pin"
+            depends on LV_TFT_DISPLAY_CONTROLLER_ST7789V
             default n
             help
                 Use software reset and ignores configured reset pin (some hardware does not use a reset pin).
@@ -888,7 +910,7 @@ menu "LVGL TFT Display controller"
                 power management IC.
 
         config LV_DISP_PIN_RST
-            int "GPIO for Reset" if LV_TFT_DISPLAY_PROTOCOL_SPI && !LV_DISP_ST7789_SOFT_RESET
+            int "GPIO for Reset" if LV_TFT_DISPLAY_PROTOCOL_SPI && !LV_DISP_ST7789_SOFT_RESET && !LV_DISP_ST7789V_SOFT_RESET
             depends on LV_DISP_USE_RST
             default 18 if LV_PREDEFINED_PINS_38V1
             default 25 if LV_PREDEFINED_PINS_38V4
