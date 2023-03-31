@@ -101,7 +101,7 @@ void st7789v_init(void)
     st7789v_send_cmd(ST7789V_SWRESET);
 #endif
 
-    printf("ST7789V initialization.\n");
+    ESP_LOGI("st7789v", "ST7789V start initialization.");
 
     //Send all the commands
     uint16_t cmd = 0;
