@@ -36,8 +36,6 @@ extern "C" {
  * When using the mono theme, the display pixels can be represented in one bit,
  * so the buffer size can be divided by 8, e.g. see SSD1306 display size. */
 
-#define SPI_HOST_MAX 3
-
 #if defined (CONFIG_CUSTOM_DISPLAY_BUFFER_SIZE)
 #define DISP_BUF_SIZE   CONFIG_CUSTOM_DISPLAY_BUFFER_BYTES
 #else

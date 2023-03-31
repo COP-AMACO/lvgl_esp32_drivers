@@ -83,20 +83,20 @@ void st7789v_init(void)
     };
 
     //Initialize non-SPI GPIOs
-    gpio_pad_select_gpio(ST7789V_DC);
+    esp_rom_gpio_pad_select_gpio(ST7789V_DC);
     gpio_set_direction(ST7789V_DC, GPIO_MODE_OUTPUT);
     
 #if !defined(ST7789V_SOFT_RST)
-    gpio_pad_select_gpio(ST7789V_RST);
+    esp_rom_gpio_pad_select_gpio(ST7789V_RST);
     gpio_set_direction(ST7789V_RST, GPIO_MODE_OUTPUT);
 #endif
 
     //Reset the display
 #if !defined(ST7789V_SOFT_RST)
     gpio_set_level(ST7789V_RST, 0);
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     gpio_set_level(ST7789V_RST, 1);
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 #else
     st7789v_send_cmd(ST7789V_SWRESET);
 #endif
@@ -109,7 +109,7 @@ void st7789v_init(void)
         st7789v_send_cmd(st7789v_init_cmds[cmd].cmd);
         st7789v_send_data(st7789v_init_cmds[cmd].data, st7789v_init_cmds[cmd].databytes&0x1F);
         if (st7789v_init_cmds[cmd].databytes & 0x80) {
-                vTaskDelay(ST7789V_TIME_TO_WAIT_AFTER_LONG_OPERATIONS / portTICK_RATE_MS);
+                vTaskDelay(ST7789V_TIME_TO_WAIT_AFTER_LONG_OPERATIONS / portTICK_PERIOD_MS);
         }
         cmd++;
     }
