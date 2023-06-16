@@ -60,7 +60,7 @@ bool FT81x_read(lv_indev_drv_t * drv, lv_indev_data_t * data)
 	uint16_t X = XY >> 16;
 
 	// is it not touched (or invalid because of calibration range)
-	if(X == 0x8000 || Y == 0x8000 || X > LV_HOR_RES_MAX || Y > LV_VER_RES_MAX)
+	if(X == 0x8000 || Y == 0x8000 || X > CONFIG_LV_HOR_RES_MAX || Y > CONFIG_LV_VER_RES_MAX)
 	{
 		touched = false;
 		X = last_x;

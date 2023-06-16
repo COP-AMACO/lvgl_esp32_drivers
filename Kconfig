@@ -1,5 +1,12 @@
 menu "LVGL ESP Drivers"
 
+    config LV_HOR_RES_MAX
+        int "horizontal max resolution"
+        default 320
+    config LV_VER_RES_MAX
+        int"vertical max resolution"
+        default 240
+
     rsource "lvgl_tft/Kconfig"
 
     rsource "lvgl_touch/Kconfig"

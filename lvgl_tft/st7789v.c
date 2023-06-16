@@ -135,7 +135,7 @@ void st7789v_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
     offsety1 += CONFIG_LV_TFT_DISPLAY_Y_OFFSET;
     offsety2 += CONFIG_LV_TFT_DISPLAY_Y_OFFSET;
 
-#elif (LV_HOR_RES_MAX == 240) && (LV_VER_RES_MAX == 240)
+#elif (CONFIG_LV_HOR_RES_MAX == 240) && (CONFIG_LV_VER_RES_MAX == 240)
     #if (CONFIG_LV_DISPLAY_ORIENTATION_PORTRAIT)
         offsetx1 += 80;
         offsetx2 += 80;
@@ -143,7 +143,7 @@ void st7789v_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
         offsety1 += 80;
         offsety2 += 80;
     #endif
-#elif (LV_HOR_RES_MAX == 240) && (LV_VER_RES_MAX == 135)
+#elif (CONFIG_LV_HOR_RES_MAX == 240) && (CONFIG_LV_VER_RES_MAX == 135)
     #if (CONFIG_LV_DISPLAY_ORIENTATION_PORTRAIT) || \
         (CONFIG_LV_DISPLAY_ORIENTATION_PORTRAIT_INVERTED)
         offsetx1 += 40;
@@ -151,7 +151,7 @@ void st7789v_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
         offsety1 += 53;
         offsety2 += 53;
     #endif
-#elif (LV_HOR_RES_MAX == 135) && (LV_VER_RES_MAX == 240)
+#elif (CONFIG_LV_HOR_RES_MAX == 135) && (CONFIG_LV_VER_RES_MAX == 240)
     #if (CONFIG_LV_DISPLAY_ORIENTATION_LANDSCAPE) || \
         (CONFIG_LV_DISPLAY_ORIENTATION_LANDSCAPE_INVERTED)
         offsetx1 += 52;
@@ -183,7 +183,7 @@ void st7789v_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
     size_t size = (size_t)lv_area_get_width(area) * (size_t)lv_area_get_height(area);
 
     st7789v_send_color((void*)color_map, size * 2);
-
+    lv_disp_flush_ready(drv);
 }
 
 /**********************

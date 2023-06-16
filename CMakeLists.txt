@@ -87,8 +87,10 @@ if(CONFIG_LV_I2C)
 endif()
 
 idf_component_register(SRCS ${SOURCES}
-                       INCLUDE_DIRS ${LVGL_INCLUDE_DIRS}
-                       REQUIRES lvgl)
+                       INCLUDE_DIRS ${LVGL_INCLUDE_DIRS} 
+                       REQUIRES lvgl
+                       PRIV_REQUIRES driver
+                       )
 
 target_compile_definitions(${COMPONENT_LIB} PUBLIC "-DLV_LVGL_H_INCLUDE_SIMPLE")
 

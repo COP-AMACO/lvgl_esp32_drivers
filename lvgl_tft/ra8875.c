@@ -37,8 +37,8 @@
 #endif
 #define BYTES_PER_PIXEL (LV_COLOR_DEPTH / 8)
 
-#define HDWR_VAL (LV_HOR_RES_MAX/8 - 1)
-#define VDHR_VAL (LV_VER_RES_MAX - 1)
+#define HDWR_VAL (CONFIG_LV_HOR_RES_MAX/8 - 1)
+#define VDHR_VAL (CONFIG_LV_VER_RES_MAX - 1)
 
 #define VDIR_MASK (1 << 2)
 #define HDIR_MASK (1 << 3)
@@ -217,7 +217,7 @@ void ra8875_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * colo
 #if DEBUG
         ESP_LOGI(TAG, "flush: set window (x1,x2): %d,%d -> %d,%d", x1, x2, area->x1, area->x2);
 #endif
-        ra8875_set_window(area->x1, area->x2, 0, LV_VER_RES_MAX-1);
+        ra8875_set_window(area->x1, area->x2, 0, CONFIG_LV_VER_RES_MAX-1);
         x1 = area->x1;
         x2 = area->x2;
     }
@@ -233,7 +233,7 @@ void ra8875_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * colo
 
     // Update to future cursor location
     y = area->y2 + 1;
-    if (y >= LV_VER_RES_MAX) {
+    if (y >= CONFIG_LV_VER_RES_MAX) {
         y = 0;
     }
 

@@ -85,7 +85,6 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void IRAM_ATTR spi_ready (spi_transaction_t *trans);
 
 /**********************
  *  STATIC VARIABLES
@@ -98,6 +97,37 @@ static transaction_cb_t chained_post_cb;
 /**********************
  *      MACROS
  **********************/
+
+/**********************
+ *   STATIC FUNCTIONS
+ **********************/
+
+static void IRAM_ATTR spi_ready(spi_transaction_t *trans)
+{
+    disp_spi_send_flag_t flags = (disp_spi_send_flag_t) trans->user;
+
+    if (flags & DISP_SPI_SIGNAL_FLUSH) {
+        lv_disp_t * disp = NULL;
+
+#if (LVGL_VERSION_MAJOR >= 7)
+        disp = _lv_refr_get_disp_refreshing();
+#else /* Before v7 */
+        disp = lv_refr_get_disp_refreshing();
+#endif
+
+#if LVGL_VERSION_MAJOR < 8
+        lv_disp_flush_ready(&disp->driver);
+#else
+        lv_disp_flush_ready(disp->driver);
+#endif
+
+    }
+
+    if (chained_post_cb) {
+        chained_post_cb(trans);
+    }
+}
+
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -293,33 +323,4 @@ void disp_spi_release(void)
     spi_device_release_bus(spi);
 }
 
-/**********************
- *   STATIC FUNCTIONS
- **********************/
-
-static void IRAM_ATTR spi_ready(spi_transaction_t *trans)
-{
-    disp_spi_send_flag_t flags = (disp_spi_send_flag_t) trans->user;
-
-    if (flags & DISP_SPI_SIGNAL_FLUSH) {
-        lv_disp_t * disp = NULL;
-
-#if (LVGL_VERSION_MAJOR >= 7)
-        disp = _lv_refr_get_disp_refreshing();
-#else /* Before v7 */
-        disp = lv_refr_get_disp_refreshing();
-#endif
-
-#if LVGL_VERSION_MAJOR < 8
-        lv_disp_flush_ready(&disp->driver);
-#else
-        lv_disp_flush_ready(disp->driver);
-#endif
-
-    }
-
-    if (chained_post_cb) {
-        chained_post_cb(trans);
-    }
-}
 
