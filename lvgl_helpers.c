@@ -17,6 +17,8 @@
 
 #include "lvgl_i2c/i2c_manager.h"
 
+#include "esp_lcd_backlight.h"
+
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
 #include "lvgl.h"
 #else
@@ -33,9 +35,17 @@
  *      TYPEDEFS
  **********************/
 
+struct _lvgl_driver_user_data {
+    disp_backlight_h *bckl_handle;
+};
+typedef struct _lvgl_driver_user_data driver_data_int;
+
 /**********************
  *  STATIC PROTOTYPES
  **********************/
+/* Initialize display backligt */
+static disp_backlight_h *lvgl_driver_backlight_init(void);
+
 
 /**********************
  *  STATIC VARIABLES
@@ -50,15 +60,35 @@
  **********************/
 
 /* Interface and driver initialization */
-void lvgl_driver_init(void)
+void lvgl_driver_init(lv_disp_drv_t *drv)
 {
+    driver_data_int *user_data = calloc(1, sizeof(driver_data_int));
+    if (user_data == NULL){
+        ESP_LOGW(TAG, "Not enough memory");
+        return;
+    }
+    drv->user_data = user_data;
+
+#if defined CONFIG_DISPLAY_ORIENTATION_PORTRAIT || defined CONFIG_DISPLAY_ORIENTATION_PORTRAIT_INVERTED
+    drv->rotated = 1;
+#endif
+
+    /* When using a monochrome display we need to register the callbacks:
+     * - rounder_cb
+     * - set_px_cb */
+#ifdef CONFIG_LV_TFT_DISPLAY_MONOCHROME
+    drv->rounder_cb = disp_driver_rounder;
+    drv->set_px_cb = disp_driver_set_px;
+#endif
+
+    drv->hor_res = CONFIG_LV_HOR_RES_MAX;
+    drv->ver_res = CONFIG_LV_VER_RES_MAX;
+
     /* Since LVGL v8 CONFIG_CONFIG_LV_HOR_RES_MAX and CONFIG_LV_VER_RES_MAX are not defined, so
      * print it only if they are defined. */
 #if (LVGL_VERSION_MAJOR < 8)
     ESP_LOGI(TAG, "Display hor size: %d, ver size: %d", CONFIG_CONFIG_LV_HOR_RES_MAX, CONFIG_LV_VER_RES_MAX);
 #endif
-
-    ESP_LOGI(TAG, "Display buffer size: %d", DISP_BUF_SIZE);
 
 #if defined (CONFIG_LV_TFT_DISPLAY_CONTROLLER_FT81X)
     ESP_LOGI(TAG, "Initializing SPI master for FT81X");
@@ -70,6 +100,7 @@ void lvgl_driver_init(void)
 
     disp_spi_add_device(TFT_SPI_HOST);
     disp_driver_init();
+    user_data->bckl_handle = lvgl_driver_backlight_init();
 
 #if defined (CONFIG_LV_TOUCH_CONTROLLER_FT81X)
     touch_driver_init();
@@ -90,6 +121,7 @@ void lvgl_driver_init(void)
     tp_spi_add_device(TOUCH_SPI_HOST);
 
     disp_driver_init();
+    user_data->bckl_handle = lvgl_driver_backlight_init();
     touch_driver_init();
 
     return;
@@ -107,8 +139,10 @@ void lvgl_driver_init(void)
     disp_spi_add_device(TFT_SPI_HOST);
 
     disp_driver_init();
+    user_data->bckl_handle = lvgl_driver_backlight_init();
 #elif defined (CONFIG_LV_I2C_DISPLAY)
     disp_driver_init();
+    user_data->bckl_handle = lvgl_driver_backlight_init();
 #else
 #error "No protocol defined for display controller"
 #endif
@@ -137,6 +171,38 @@ void lvgl_driver_init(void)
     #endif
 #else
 #endif
+}
+
+disp_backlight_h *lvgl_driver_backlight_init(void)
+{
+    // We still use menuconfig for these settings
+    // It will be set up during runtime in the future
+#if (defined(CONFIG_LV_DISP_BACKLIGHT_SWITCH) || defined(CONFIG_LV_DISP_BACKLIGHT_PWM))
+    const disp_backlight_config_t bckl_config = {
+        .gpio_num = CONFIG_LV_DISP_PIN_BCKL,
+#if defined CONFIG_LV_DISP_BACKLIGHT_PWM
+        .pwm_control = true,
+#else
+        .pwm_control = false,
+#endif
+#if defined CONFIG_LV_BACKLIGHT_ACTIVE_LVL
+        .output_invert = false, // Backlight on high
+#else
+        .output_invert = true, // Backlight on low
+#endif
+        .timer_idx = 0,
+        .channel_idx = 0 // @todo this prevents us from having two PWM controlled displays
+    };
+    disp_backlight_h bckl_handle = disp_backlight_new(&bckl_config);
+    disp_backlight_set(bckl_handle, 100);
+    return bckl_handle;
+#else
+    return NULL;
+#endif
+}
+
+void lvgl_driver_backlight_set(lv_disp_drv_t *drv, int brightness_percent) {
+    disp_backlight_set(((driver_data_int *)drv->user_data)->bckl_handle, brightness_percent);
 }
 
 
