@@ -12,6 +12,7 @@
 #include "soc/ledc_periph.h" // to invert LEDC output on IDF version < v4.3
 #include <driver/ledc.h>
 #include <driver/gpio.h>
+#include <esp_rom_gpio.h>
 
 typedef struct {
     bool pwm_control; // true: LEDC is used, false: GPIO is used

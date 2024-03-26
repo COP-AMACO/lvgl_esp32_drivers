@@ -87,6 +87,10 @@ extern "C" {
 #endif
 #endif
 
+#ifndef SPI_HOST_MAX
+# define SPI_HOST_MAX 3
+#endif
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -98,7 +102,10 @@ extern "C" {
 void lvgl_i2c_locking(void* leader);
 
 /* Initialize detected SPI and I2C bus and devices */
-void lvgl_driver_init(void);
+void lvgl_driver_init(lv_disp_drv_t *);
+
+/* Set display backlight brightness */
+void lvgl_driver_backlight_set(lv_disp_drv_t *, int brightness_percent);
 
 /* Initialize SPI master  */
 bool lvgl_spi_driver_init(int host, int miso_pin, int mosi_pin, int sclk_pin,
