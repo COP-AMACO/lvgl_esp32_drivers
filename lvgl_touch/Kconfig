@@ -47,6 +47,12 @@ menu "LVGL Touch controller"
         help
             Touch controller protocol SPI
 
+    config LV_TOUCH_DRIVER_FULLDUPLEX
+        bool "Spi Fullduplex"
+        help
+            Touch driver in fullduplex spi
+
+
     config LV_I2C_TOUCH
         bool
         help
