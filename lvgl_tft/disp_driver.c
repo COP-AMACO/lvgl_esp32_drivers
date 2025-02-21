@@ -126,3 +126,12 @@ void disp_driver_set_px(lv_disp_drv_t * disp_drv, uint8_t * buf, lv_coord_t buf_
    pcd8544_set_px_cb(disp_drv, buf, buf_w, x, y, color, opa);
 #endif
 }
+
+void disp_driver_invert_colors(bool is_inverted)
+{
+#if defined CONFIG_LV_TFT_DISPLAY_CONTROLLER_ST7789V
+    st7789v_invert_colors(is_inverted);
+#else
+    assert(0);
+#endif
+}

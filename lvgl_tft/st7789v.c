@@ -203,6 +203,19 @@ void st7789v_send_data(void * data, uint16_t length)
     disp_spi_send_data(data, length);
 }
 
+void st7789v_invert_colors(bool is_inverted)
+{
+    if (is_inverted == true)
+    {
+        st7789v_send_cmd(ST7789V_INVON);
+    }
+    else
+    {
+        st7789v_send_cmd(ST7789V_INVOFF);
+    }
+    st7789v_send_data((void *)NULL, 0);
+}
+
 static void st7789v_send_color(void * data, size_t length)
 {
     disp_wait_for_pending_transactions();
