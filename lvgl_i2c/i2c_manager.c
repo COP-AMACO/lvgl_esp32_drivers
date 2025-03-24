@@ -58,7 +58,8 @@ static SemaphoreHandle_t* I2C_FN(_mutex) = &I2C_FN(_local_mutex)[0];
 
 static const uint8_t ACK_CHECK_EN = 1;
 
-#if defined (I2C_NUM_0) && defined (CONFIG_I2C_MANAGER_0_ENABLED)
+#if defined (CONFIG_I2C_MANAGER_0_ENABLED)
+	#define I2C_ZERO_EXISTS 			(I2C_NUM_0 < I2C_NUM_MAX)
 	#define I2C_ZERO 					I2C_NUM_0
 	#if defined (CONFIG_I2C_MANAGER_0_PULLUPS)
 		#define I2C_MANAGER_0_PULLUPS 	true
@@ -66,12 +67,13 @@ static const uint8_t ACK_CHECK_EN = 1;
 		#define I2C_MANAGER_0_PULLUPS 	false
 	#endif
 
-	#define I2C_MANAGER_0_TIMEOUT 		( CONFIG_I2C_MANAGER_0_TIMEOUT / portTICK_RATE_MS )
-	#define I2C_MANAGER_0_LOCK_TIMEOUT	( CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT / portTICK_RATE_MS )
+	#define I2C_MANAGER_0_TIMEOUT 		( CONFIG_I2C_MANAGER_0_TIMEOUT / portTICK_PERIOD_MS )
+	#define I2C_MANAGER_0_LOCK_TIMEOUT	( CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT / portTICK_PERIOD_MS )
 #endif
 
 
-#if defined (I2C_NUM_1) && defined (CONFIG_I2C_MANAGER_1_ENABLED)
+#if defined (CONFIG_I2C_MANAGER_1_ENABLED)
+	#define I2C_ONE_EXISTS 			(I3C_NUM_1 < I2C_NUM_MAX)
 	#define I2C_ONE 					I2C_NUM_1
 	#if defined (CONFIG_I2C_MANAGER_1_PULLUPS)
 		#define I2C_MANAGER_1_PULLUPS 	true
@@ -90,14 +92,14 @@ static const uint8_t ACK_CHECK_EN = 1;
 
 #if defined(I2C_ZERO) && defined (I2C_ONE)
 	#define I2C_PORT_CHECK(port, fail) \
-		if (port != I2C_NUM_0 && port != I2C_NUM_1) ERROR_PORT(port, fail);
+		if (I2C_ZERO_EXISTS == true && I2C_ONE_EXISTS == true && port != I2C_NUM_0 && port != I2C_NUM_1) ERROR_PORT(port, fail);
 #else
 	#if defined(I2C_ZERO)
 		#define I2C_PORT_CHECK(port, fail) \
-			if (port != I2C_NUM_0) ERROR_PORT(port, fail);
+			if (I2C_ZERO_EXISTS == false || port != I2C_NUM_0) ERROR_PORT(port, fail);
 	#elif defined(I2C_ONE)
 		#define I2C_PORT_CHECK(port, fail) \
-			if (port != I2C_NUM_1) ERROR_PORT(port, fail);
+			if (I2C_ONE_EXISTS == false || port != I2C_NUM_1) ERROR_PORT(port, fail);
 	#else
 		#define I2C_PORT_CHECK(port, fail) \
 			ERROR_PORT(port, fail);
@@ -168,8 +170,8 @@ esp_err_t I2C_FN(_init)(i2c_port_t port) {
 			ESP_LOGW(TAG, "If it was already open, we'll use it with whatever settings were used "
 			              "to open it. See I2C Manager README for details.");
 		} else {
-			ESP_LOGI(TAG, "Initialised port %d (SDA: %d, SCL: %d, speed: %d Hz.)",
-					 port, conf.sda_io_num, conf.scl_io_num, conf.master.clk_speed);
+			ESP_LOGI(TAG, "Initialised port %d (SDA: %d, SCL: %d, speed: %"PRIu32" Hz.)",
+					 (int)port, conf.sda_io_num, conf.scl_io_num, conf.master.clk_speed);
 		}
 
 	}
@@ -186,7 +188,7 @@ esp_err_t I2C_FN(_read)(i2c_port_t port, uint16_t addr, uint32_t reg, uint8_t *b
     // May seem weird, but init starts with a check if it's needed, no need for that check twice.
 	I2C_FN(_init)(port);
 
-   	ESP_LOGV(TAG, "Reading port %d, addr 0x%03x, reg 0x%04x", port, addr, reg);
+   	ESP_LOGV(TAG, "Reading port %d, addr 0x%03"PRIx16", reg 0x%04"PRIx32, (int)port, addr, reg);
 
 	TickType_t timeout = 0;
 	#if defined (I2C_ZERO)
@@ -239,12 +241,12 @@ esp_err_t I2C_FN(_write)(i2c_port_t port, uint16_t addr, uint32_t reg, const uin
     // May seem weird, but init starts with a check if it's needed, no need for that check twice.
 	I2C_FN(_init)(port);
 
-    ESP_LOGV(TAG, "Writing port %d, addr 0x%03x, reg 0x%04x", port, addr, reg);
+    ESP_LOGV(TAG, "Writing port %d, addr 0x%03"PRIx16", reg 0x%04"PRIx32, (int)port, addr, reg);
 
 	TickType_t timeout = 0;
 	#if defined (I2C_ZERO)
 		if (port == I2C_NUM_0) {
-			timeout = (CONFIG_I2C_MANAGER_0_TIMEOUT) / portTICK_RATE_MS;
+			timeout = (CONFIG_I2C_MANAGER_0_TIMEOUT) / portTICK_PERIOD_MS;
 		}
 	#endif
 	#if defined (I2C_ONE)
@@ -294,7 +296,7 @@ esp_err_t I2C_FN(_lock)(i2c_port_t port) {
 	TickType_t timeout;
 	#if defined (I2C_ZERO)
 		if (port == I2C_NUM_0) {
-			timeout = (CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT) / portTICK_RATE_MS;
+			timeout = (CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT) / portTICK_PERIOD_MS;
 		}
 	#endif
 	#if defined (I2C_ONE)
