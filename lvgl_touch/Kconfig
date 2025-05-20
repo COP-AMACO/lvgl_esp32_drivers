@@ -475,11 +475,7 @@ menu "LVGL Touch controller"
             prompt "I2C slave address for GT911."
             default LV_TOUCH_CONTROLLER_GT911_I2C_ADDR_0X5D
             help
-<<<<<<< HEAD
-                Select the controller for your touch panel.
-=======
                 Select the slave address of I2C slave. Default is 0x5D for GT911.
->>>>>>> master
 
             config LV_TOUCH_CONTROLLER_GT911_I2C_ADDR_0X5D
                 bool "0x5D"
