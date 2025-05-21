@@ -26,7 +26,11 @@
 #endif
 #include "gt911.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "lvgl_i2c/i2c_manager.h"
+#include "driver/gpio.h"
 
 #define TAG "GT911"
 
@@ -42,6 +46,34 @@ esp_err_t gt911_i2c_write8(uint8_t slave_addr, uint16_t register_addr, uint8_t d
     return lvgl_i2c_write(CONFIG_LV_I2C_TOUCH_PORT, slave_addr, register_addr | I2C_REG_16, &buffer, 1);
 }
 
+void gt911_reset(void)
+{
+    esp_rom_gpio_pad_select_gpio(GT911_RST);
+    gpio_set_direction(GT911_RST, GPIO_MODE_OUTPUT);
+
+    esp_rom_gpio_pad_select_gpio(GT911_INT);
+    gpio_set_direction(GT911_INT, GPIO_MODE_OUTPUT);
+
+    //Reset TFT 
+    gpio_set_level(GT911_RST, 0);
+
+    if (GT911_I2C_SLAVE_ADDR == 0x14)
+    {
+        gpio_set_level(GT911_INT, 1);
+    }
+    else
+    {
+        gpio_set_level(GT911_INT, 0);
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(10)); // Should not be shorter than 100μs
+
+    gpio_set_level(GT911_RST, 1);
+    vTaskDelay(pdMS_TO_TICKS(55)); // Even if datasheet wrote 5ms. It doesn't work below 50ms
+    gpio_reset_pin(GT911_INT);
+    vTaskDelay(pdMS_TO_TICKS(50)); // Should not be shorter than 50ms
+}
+
 /**
   * @brief  Initialize for GT911 communication via I2C
   * @param  dev_addr: Device address on communication Bus (I2C slave address of GT911).
@@ -49,6 +81,8 @@ esp_err_t gt911_i2c_write8(uint8_t slave_addr, uint16_t register_addr, uint8_t d
   */
 void gt911_init(uint8_t dev_addr) {
     if (!gt911_status.inited) {
+        gt911_reset();
+
         gt911_status.i2c_dev_addr = dev_addr;
         uint8_t data_buf;
         esp_err_t ret;
