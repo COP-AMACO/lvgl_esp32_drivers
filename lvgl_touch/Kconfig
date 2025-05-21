@@ -449,6 +449,21 @@ menu "LVGL Touch controller"
 
     menu "Touchpanel Configuration (GT911)"
         depends on LV_TOUCH_CONTROLLER_GT911
+    
+    config LV_GT911_FORCE_I2C_ADDRESS
+        bool
+        prompt "Reset touch to boot with specific I2C address"
+        default n
+    
+    config LV_GT911_PIN_RST
+        depends on LV_GT911_FORCE_I2C_ADDRESS
+        int
+        prompt "GT911 RESET pin"
+
+    config LV_GT911_PIN_INT
+        depends on LV_GT911_FORCE_I2C_ADDRESS
+        int
+        prompt "GT911 INT pin"
 
     config LV_GT911_SWAPXY
         bool
