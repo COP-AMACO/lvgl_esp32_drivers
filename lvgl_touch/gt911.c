@@ -138,10 +138,17 @@ bool gt911_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         //Reset Status Reg Value
         gt911_i2c_write8(gt911_status.i2c_dev_addr, GT911_STATUS_REG, 0x00);
     }
-    if (touch_pnt_cnt != 1) {    // ignore no touch & multi touch
+    if (touch_pnt_cnt == 0) {    // ignore no touch
         data->point.x = last_x;
         data->point.y = last_y;
         data->state = LV_INDEV_STATE_REL;
+        return false;
+    }
+    else if (touch_pnt_cnt > 1) // keep first touch when multi touch
+    {
+        data->point.x = last_x;
+        data->point.y = last_y;
+        data->state = LV_INDEV_STATE_PR;
         return false;
     }
 
