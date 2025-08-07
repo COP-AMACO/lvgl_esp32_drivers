@@ -66,12 +66,12 @@ void gt911_reset(void)
         gpio_set_level(GT911_INT, 0);
     }
 
-    vTaskDelay(pdMS_TO_TICKS(80)); // Should not be shorter than 100μs
+    vTaskDelay(pdMS_TO_TICKS(150)); // Should not be shorter than 100μs
 
     gpio_set_level(GT911_RST, 1);
-    vTaskDelay(pdMS_TO_TICKS(200)); // Even if datasheet wrote 5ms. It doesn't work below 50ms
+    vTaskDelay(pdMS_TO_TICKS(300)); // Even if datasheet wrote 5ms. It doesn't work below 50ms
     gpio_reset_pin(GT911_INT);
-    vTaskDelay(pdMS_TO_TICKS(200)); // Should not be shorter than 50ms
+    vTaskDelay(pdMS_TO_TICKS(300)); // Should not be shorter than 50ms
 }
 
 /**
